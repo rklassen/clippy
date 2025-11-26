@@ -9,29 +9,31 @@
             background-color: #131315;
             color: #9dbbad;
             font-family: Arial, sans-serif;
+            font-size: 1.62rem;
             margin: 0;
             padding: 20px;
         }
         #chat {
-            border: 1px solid #9fccd0;
             height: 400px;
             overflow-y: auto;
             padding: 10px;
             margin-bottom: 10px;
             background-color: #0c0c10;
+            border-radius: 10px;
         }
         #message {
             width: 80%;
             padding: 10px;
             background-color: #313136;
             color: #fff8d8;
-            border: 1px solid #9ad2d2;
+            border-radius: 10px;
         }
         button {
             padding: 10px;
             background-color: #9fccd0;
             color: #131315;
             border: none;
+            border-radius: 10px;
             cursor: pointer;
         }
         button:hover {
@@ -47,9 +49,12 @@
 </head>
 <body>
     <h1>Clippy Chatbot</h1>
+    <div id="status">Status: Checking...</div>
+    <button id="downloadBtn" onclick="downloadModel()" style="display:none;">Download Model</button>
+    <div id="progress" style="display:none;">Downloading: <span id="progressText">0%</span></div>
     <div id="chat"></div>
-    <input type="text" id="message" placeholder="Type your message...">
-    <button onclick="sendMessage()">Send</button>
+    <input type="text" id="message" placeholder="Type your message..." disabled>
+    <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
     <script src="script.js"></script>
 </body>
 </html>
