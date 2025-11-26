@@ -2,20 +2,11 @@
 
 This is a project for a locally deployed chatbot using Qwen2-0.5B (8-bit quantization) on MacBook Pro M1.
 
-## Setup
+## Quick Start
 
-1. Install Ollama: Follow instructions at [ollama.ai](https://ollama.ai).
-2. Pull the model: `ollama pull qwen2:0.5b-q8_0`
-3. Install dependencies: `pip install -r requirements.txt`
-4. Run the app: `python app.py`
+Run `./start.zsh` to automatically start Ollama, pull the model, and open the interface in your browser.
 
-## JavaScript Interface
-
-A simple dark-mode web interface using the theme colors.
-
-1. Ensure Ollama is running.
-2. Open `index.html` in a browser (e.g., via `python -m http.server` or directly).
-3. Start chatting!
+## Manual Setup
 
 ## Color Theme: Rust Python Functional Dark-52
 
