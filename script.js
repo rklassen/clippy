@@ -26,7 +26,7 @@ function updateStatus(statusKey, customText = null) {
     statusEl.className = config.class;
     
     if (config.emoji.length === 1) {
-        // Static emoji
+        // Static emoji - now after text due to flex-row-reverse
         statusEl.innerHTML = `<span class="status-emoji">${config.emoji[0]}</span>${text}`;
     } else {
         // Cycling emojis at 80 bpm (750ms per beat)
@@ -41,6 +41,14 @@ function updateStatus(statusKey, customText = null) {
             }
         }, 750); // 80 bpm = 750ms per beat
     }
+}
+
+function updateMetrics(tokens, timeMs) {
+    const metricsEl = document.getElementById('metrics');
+    if (!metricsEl) return;
+    
+    const tps = tokens / (timeMs / 1000);
+    metricsEl.textContent = `${tokens}t · ${timeMs}ms · ${tps.toFixed(1)}t/s`;
 }
 
 async function checkStatus() {
@@ -138,6 +146,8 @@ async function sendMessage() {
     // Set working status
     updateStatus('working');
 
+    const startTime = performance.now();
+
     try {
         const response = await fetch('http://localhost:11434/api/chat', {
             method: 'POST',
@@ -152,6 +162,8 @@ async function sendMessage() {
         });
 
         const data = await response.json();
+        const endTime = performance.now();
+        const timeMs = Math.round(endTime - startTime);
         const botMessage = data.message.content;
 
         // Add bot response to chat
@@ -160,6 +172,11 @@ async function sendMessage() {
         botMsg.innerHTML = `<strong>Bot</strong><div class="text">${escapeHtml(botMessage)}</div>`;
         chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
+        
+        // Update metrics if token count available
+        if (data.eval_count) {
+            updateMetrics(data.eval_count, timeMs);
+        }
         
         // Return to ready status
         updateStatus('ready');

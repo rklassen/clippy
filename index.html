@@ -64,12 +64,23 @@
             font-weight: 500;
             letter-spacing: -0.01em;
             display: flex;
+            flex-direction: row-reverse;
             align-items: center;
             gap: 8px;
         }
         .status-emoji {
             font-size: 1rem;
             line-height: 1;
+        }
+        .metrics {
+            font-size: 0.85rem;
+            color: rgba(112, 122, 132, 0.5);
+            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
+            letter-spacing: -0.02em;
+            padding: 6px 12px;
+            background-color: #131315;
+            border-radius: 4px;
+            white-space: nowrap;
         }
         #status.ready {
             color: #84f3d2;
@@ -306,6 +317,7 @@
                 <h1>Clippy</h1>
             </div>
             <div class="header-right">
+                <div id="metrics" class="metrics"></div>
                 <div id="status">Status: Checking...</div>
                 <button id="downloadBtn" onclick="downloadModel()" style="display:none;">Download Model</button>
                 <div id="progress" style="display:none;">Downloading: <span id="progressText">0%</span></div>
