@@ -1,6 +1,6 @@
 # Clippy
 
-This is a project for a locally deployed chatbot using Qwen2-0.5B (8-bit quantization) on MacBook Pro M1.
+This is a project for a locally deployed chatbot using Qwen2-0.5B on MacBook Pro M1.
 
 ## Quick Start
 

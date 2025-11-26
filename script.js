@@ -32,7 +32,7 @@ async function downloadModel() {
         const response = await fetch('http://localhost:11434/api/pull', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: 'qwen2:0.5b-q8_0' })
+            body: JSON.stringify({ name: 'qwen2:0.5b' })
         });
 
         const reader = response.body.getReader();
@@ -82,7 +82,7 @@ async function sendMessage() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'qwen2:0.5b-q8_0',
+                model: 'qwen2:0.5b',
                 messages: [{ role: 'user', content: message }],
                 stream: false
             })
