@@ -9,6 +9,14 @@ This is a project for a locally deployed chatbot using Qwen2-0.5B (8-bit quantiz
 3. Install dependencies: `pip install -r requirements.txt`
 4. Run the app: `python app.py`
 
+## JavaScript Interface
+
+A simple dark-mode web interface using the theme colors.
+
+1. Ensure Ollama is running.
+2. Open `index.html` in a browser (e.g., via `python -m http.server` or directly).
+3. Start chatting!
+
 ## Color Theme: Rust Python Functional Dark-52
 
 Here are the unique hex color codes from the VS Code theme:
