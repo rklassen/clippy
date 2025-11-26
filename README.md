@@ -8,6 +8,16 @@ Run `./start.zsh` to automatically start Ollama, pull the model, and open the in
 
 ## Manual Setup
 
+## Status indicators
+
+Status              | Indicator(s)
+--------------------|---------------
+No model            | 🌑
+Downloading model   | 📡🛰️
+Initializing        | ⏳🛠️
+Ready               | 🟢
+Working             | 🧠💭✍️📝
+
 ## Color Theme: Rust Python Functional Dark-52
 
 Here are the unique hex color codes from the VS Code theme:

@@ -1,4 +1,47 @@
 let isReady = false;
+let emojiInterval = null;
+
+const statusConfig = {
+    noModel: { text: 'No model', emoji: ['🌑'], class: 'error' },
+    downloading: { text: 'Downloading model', emoji: ['📡', '🛰️'], class: '' },
+    initializing: { text: 'Initializing', emoji: ['⏳', '🛠️'], class: '' },
+    ready: { text: 'Ready', emoji: ['🟢'], class: 'ready' },
+    working: { text: 'Working', emoji: ['🧠', '💭', '✍️', '📝'], class: '' },
+    error: { text: 'Error', emoji: ['❌'], class: 'error' }
+};
+
+function updateStatus(statusKey, customText = null) {
+    const statusEl = document.getElementById('status');
+    const config = statusConfig[statusKey];
+    
+    if (!config) return;
+    
+    // Clear any existing emoji interval
+    if (emojiInterval) {
+        clearInterval(emojiInterval);
+        emojiInterval = null;
+    }
+    
+    const text = customText || config.text;
+    statusEl.className = config.class;
+    
+    if (config.emoji.length === 1) {
+        // Static emoji
+        statusEl.innerHTML = `<span class="status-emoji">${config.emoji[0]}</span>${text}`;
+    } else {
+        // Cycling emojis at 80 bpm (750ms per beat)
+        let index = 0;
+        statusEl.innerHTML = `<span class="status-emoji">${config.emoji[0]}</span>${text}`;
+        
+        emojiInterval = setInterval(() => {
+            index = (index + 1) % config.emoji.length;
+            const emojiSpan = statusEl.querySelector('.status-emoji');
+            if (emojiSpan) {
+                emojiSpan.textContent = config.emoji[index];
+            }
+        }, 750); // 80 bpm = 750ms per beat
+    }
+}
 
 async function checkStatus() {
     try {
@@ -7,26 +50,26 @@ async function checkStatus() {
             const data = await response.json();
             const hasModel = data.models.some(m => m.name.includes('qwen2:0.5b'));
             if (hasModel) {
-                document.getElementById('status').textContent = 'Status: r2r = ready 2 roll';
+                updateStatus('ready');
                 document.getElementById('message').disabled = false;
                 document.getElementById('sendBtn').disabled = false;
                 isReady = true;
             } else {
-                document.getElementById('status').textContent = 'Status: Model not found';
-                document.getElementById('downloadBtn').style.display = 'inline';
+                updateStatus('noModel');
+                document.getElementById('downloadBtn').style.display = 'inline-block';
             }
         } else {
-            document.getElementById('status').textContent = 'Status: Ollama not running';
+            updateStatus('error', 'Ollama not running');
         }
     } catch (error) {
-        document.getElementById('status').textContent = 'Status: Error - ' + error.message;
+        updateStatus('error', error.message);
     }
 }
 
 async function downloadModel() {
     document.getElementById('downloadBtn').style.display = 'none';
     document.getElementById('progress').style.display = 'block';
-    document.getElementById('status').textContent = 'Status: Downloading...';
+    updateStatus('downloading');
 
     try {
         const response = await fetch('http://localhost:11434/api/pull', {
@@ -57,9 +100,10 @@ async function downloadModel() {
         }
 
         document.getElementById('progress').style.display = 'none';
-        checkStatus();
+        updateStatus('initializing');
+        setTimeout(() => checkStatus(), 1000);
     } catch (error) {
-        document.getElementById('status').textContent = 'Status: Download failed - ' + error.message;
+        updateStatus('error', 'Download failed - ' + error.message);
         document.getElementById('downloadBtn').style.display = 'inline';
     }
 }
@@ -67,13 +111,32 @@ async function downloadModel() {
 async function sendMessage() {
     if (!isReady) return;
 
-    const message = document.getElementById('message').value;
+    const messageInput = document.getElementById('message');
+    const message = messageInput.value.trim();
     if (!message) return;
 
-    // Add user message to chat
     const chat = document.getElementById('chat');
-    chat.innerHTML += `<p class="user"><strong>You:</strong> ${message}</p>`;
-    document.getElementById('message').value = '';
+    
+    // Remove empty state if it exists
+    const emptyState = chat.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    // Add user message to chat
+    const userMsg = document.createElement('div');
+    userMsg.className = 'message user';
+    userMsg.innerHTML = `<strong>You</strong><div class="text">${escapeHtml(message)}</div>`;
+    chat.appendChild(userMsg);
+    
+    messageInput.value = '';
+    messageInput.disabled = true;
+    document.getElementById('sendBtn').disabled = true;
+    
+    chat.scrollTop = chat.scrollHeight;
+
+    // Set working status
+    updateStatus('working');
 
     try {
         const response = await fetch('http://localhost:11434/api/chat', {
@@ -92,11 +155,31 @@ async function sendMessage() {
         const botMessage = data.message.content;
 
         // Add bot response to chat
-        chat.innerHTML += `<p class="bot"><strong>Bot:</strong> ${botMessage}</p>`;
+        const botMsg = document.createElement('div');
+        botMsg.className = 'message bot';
+        botMsg.innerHTML = `<strong>Bot</strong><div class="text">${escapeHtml(botMessage)}</div>`;
+        chat.appendChild(botMsg);
         chat.scrollTop = chat.scrollHeight;
+        
+        // Return to ready status
+        updateStatus('ready');
     } catch (error) {
-        chat.innerHTML += `<p class="bot"><strong>Bot:</strong> Error: ${error.message}</p>`;
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'message bot error';
+        errorMsg.innerHTML = `<strong>Error</strong><div class="text">${escapeHtml(error.message)}</div>`;
+        chat.appendChild(errorMsg);
+        updateStatus('error', error.message);
+    } finally {
+        messageInput.disabled = false;
+        document.getElementById('sendBtn').disabled = false;
+        messageInput.focus();
     }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Allow sending with Enter key

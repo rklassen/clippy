@@ -5,56 +5,323 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clippy Chatbot</title>
     <style>
-        body {
-            background-color: #131315;
-            color: #9dbbad;
-            font-family: Arial, sans-serif;
-            font-size: 1.62rem;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #0c0c10;
+            color: #9dbbad;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
-        #chat {
-            height: 400px;
-            overflow-y: auto;
-            padding: 10px;
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
             margin-bottom: 10px;
-            background-color: #0c0c10;
-            border-radius: 10px;
         }
-        #message {
-            width: 80%;
-            padding: 10px;
-            background-color: #313136;
-            color: #fff8d8;
-            border-radius: 10px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        button {
-            padding: 10px;
+        .logo-svg {
+            width: 40px;
+            height: 40px;
+            fill: #ded089;
+            flex-shrink: 0;
+        }
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #ded089;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+        #status {
+            font-size: 0.85rem;
+            color: #707a84;
+            padding: 6px 12px;
+            background-color: #131315;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-emoji {
+            font-size: 1rem;
+            line-height: 1;
+        }
+        #status.ready {
+            color: #84f3d2;
+            background-color: rgba(132, 243, 210, 0.1);
+        }
+        #status.error {
+            color: #ff4f8a;
+            background-color: rgba(255, 79, 138, 0.1);
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        #downloadBtn {
+            padding: 8px 16px;
             background-color: #9fccd0;
-            color: #131315;
+            color: #000;
             border: none;
-            border-radius: 10px;
+            border-radius: 4px;
             cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
         }
-        button:hover {
+        #downloadBtn:hover {
             background-color: #84f3d2;
+            transform: translateY(-1px);
+        }
+        #progress {
+            padding: 6px 12px;
+            background-color: #131315;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        #progressText {
+            font-size: 1.25rem;
+            color: #42a5f5;
+            font-weight: 600;
+        }
+        #chat {
+            height: 500px;
+            overflow-y: auto;
+            padding: 20px;
+            background-color: #131315;
+            border: 1px solid #535d75;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: relative;
+        }
+        #chat::before {
+            content: '';
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            background-image: url('clippy.svg');
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: contain;
+            opacity: 0.04;
+            pointer-events: none;
+            z-index: 0;
+        }
+        #chat > * {
+            position: relative;
+            z-index: 1;
+        }
+        #chat::-webkit-scrollbar {
+            width: 8px;
+        }
+        #chat::-webkit-scrollbar-track {
+            background: #0c0c10;
+            border-radius: 4px;
+        }
+        #chat::-webkit-scrollbar-thumb {
+            background: #535d75;
+            border-radius: 4px;
+        }
+        #chat::-webkit-scrollbar-thumb:hover {
+            background: #707a84;
+        }
+        .message {
+            padding: 14px 18px;
+            border-radius: 10px;
+            max-width: 85%;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .user {
+            background-color: rgba(222, 208, 137, 0.12);
+            border-left: 3px solid #ded089;
+            align-self: flex-end;
+        }
+        .user strong {
             color: #ded089;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .user .text {
+            color: #fff8d8;
+            font-size: 1rem;
+            margin-top: 6px;
         }
         .bot {
+            background-color: rgba(159, 204, 208, 0.08);
+            border-left: 3px solid #9fccd0;
+            align-self: flex-start;
+        }
+        .bot strong {
+            color: #9fccd0;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .bot .text {
             color: #9dbbad;
+            font-size: 1rem;
+            margin-top: 6px;
+            line-height: 1.7;
+        }
+        .error {
+            background-color: rgba(255, 79, 138, 0.1);
+            border-left: 3px solid #ff4f8a;
+        }
+        .error .text {
+            color: #ff4f8a;
+        }
+        .input-area {
+            display: flex;
+            gap: 12px;
+            padding: 20px;
+            background-color: #131315;
+            border: 1px solid #535d75;
+            border-radius: 12px;
+        }
+        #message {
+            flex: 1;
+            padding: 14px 18px;
+            background-color: #0c0c10;
+            color: #fff8d8;
+            border: 1px solid #535d75;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: border-color 0.2s ease;
+        }
+        #message:focus {
+            outline: none;
+            border-color: #9fccd0;
+        }
+        #message:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #message::placeholder {
+            color: #707a84;
+        }
+        #sendBtn {
+            padding: 14px 28px;
+            background-color: #9fccd0;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        #sendBtn:hover:not(:disabled) {
+            background-color: #84f3d2;
+            transform: translateY(-1px);
+        }
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        #sendBtn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .empty-state {
+            text-align: center;
+            color: #707a84;
+            font-size: 1rem;
+            padding: 60px 20px;
+        }
+        .empty-state p {
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            #chat {
+                height: 400px;
+            }
+            .message {
+                max-width: 90%;
+            }
+            .input-area {
+                flex-direction: column;
+            }
+            #sendBtn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Clippy Chatbot</h1>
-    <div id="status">Status: Checking...</div>
-    <button id="downloadBtn" onclick="downloadModel()" style="display:none;">Download Model</button>
-    <div id="progress" style="display:none;">Downloading: <span id="progressText">0%</span></div>
-    <div id="chat"></div>
-    <input type="text" id="message" placeholder="Type your message..." disabled>
-    <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
-    <script src="script.js"></script>
+    <div class="container">
+        <header>
+            <div class="header-left">
+                <svg class="logo-svg" viewBox="0 0 498 578" xmlns="http://www.w3.org/2000/svg">
+                    <path d="m 139.60646,417.54919 c 0,34.69562 -4.73022,70.97095 16.26855,100.99994 42.23504,60.39752 140.8891,59.76361 180.7952,-3 19.30579,-30.3638 14.93625,-66.66339 14.93625,-100.99994 v -190 c -7.42877,0.79895 -14.1293,3.40112 -16.71545,11.09503 -2.74494,8.16638 -1.28455,18.40439 -1.28455,26.90497 v 53 116 c 0,27.14062 1.15842,53.97855 -15.72491,76.99634 -36.22406,49.38586 -115.56281,45.92779 -148.57129,-4.9997 -15.45617,-23.84671 -11.7038,-52.93148 -11.7038,-79.99664 18.86194,6.38849 41.47549,3.10681 59.38792,10.09604 6.50647,2.53876 5.40253,11.28934 9.77358,15.91061 6.82899,7.21991 22.88365,5.94513 31.8385,4.32572 19.79614,-3.57999 52.83112,-14.09958 40.11383,-41.26837 -8.30688,-17.74656 -33.97623,-19.04035 -51.11383,-19.05863 -6.70667,-0.007 -14.79037,-0.67523 -20.11333,4.22476 -5.21049,4.79648 -4.84269,12.2753 -4.88667,18.76987 -15.09839,-0.0559 -30.23695,-1.72141 -44.99976,-4.93341 -5.47616,-1.19147 -13.26863,-2.09784 -17.16372,-6.58899 -5.76435,-6.64636 -2.83652,-22.28778 -2.83652,-30.4776 v -80 c 0,-20.2001 9.39969,-65.96161 -18,-70 v 176 c -18.10631,-7.52698 -51.527722,-20.06863 -60.163464,-39.12402 -3.072365,-6.77942 -1.836365,-15.61701 -1.83654,-22.87598 11.232208,14.6149 20.35096,21.09015 38.999524,20.98886 6.1401,-0.0333 13.85103,0.25568 17.56191,-5.65011 6.58703,-10.48307 2.43857,-32.33405 2.43857,-44.33875 v -61 c 0,-8.6846 1.96494,-20.44781 -1.63123,-28.5668 -3.04087,-6.8653 -10.82579,-7.29819 -17.37022,-7.39838 -17.28035,-0.26453 -26.395817,5.48395 -37.998554,17.96518 2.005669,-44.41782 12.962334,-87.2355 45.197924,-119.87302 61.37274,-62.137902 179.22328,-61.515161 240.65437,-5.5e-4 32.09772,32.14136 45.13688,76.42905 45.14771,120.87357 -10.10071,-13.78381 -19.97958,-19.16367 -36.99945,-18.97552 -6.20258,0.0686 -13.87998,0.20376 -17.16403,6.49194 -4.36841,8.36438 -1.83652,22.30304 -1.83652,31.48358 v 72 c 0,8.96994 -2.8465,24.27927 2.43857,32.05313 5.42431,7.97873 25.58935,6.03708 33.55935,3.55731 9.91532,-3.08502 14.73993,-11.96798 22.62455,-17.84286 17.26315,-12.86295 34.89871,-19.04474 40.07757,-42.76758 2.49637,-11.43509 1.05319,-23.51108 -4.11285,-34 -3.96799,-8.0564 -10.42145,-14.72806 -11.32916,-24 -3.18607,-32.54385 -3.04175,-61.93347 -15.76484,-93 C 386.46538,59.539427 299.92476,11.147154 207.60646,27.553893 134.99407,40.458495 79.515422,101.17932 60.254138,170.54919 c -6.579071,23.69464 -4.639171,47.13199 -8.063328,71 -2.280519,15.8963 -15.941078,26.617 -16.224403,44 -0.366258,22.47125 15.441895,30.43091 23.809814,48.34357 5.136601,10.99557 -1.173938,24.49017 3.734463,35.63138 3.595345,8.16079 12.099774,13.74288 19.095963,18.76107 17.122177,12.28131 36.468823,23.85541 56.999813,29.26398 m 102,-381.499081 c 25.22868,-0.949952 51.9668,4.25061 75,14.500488 3.59012,1.597595 33.76089,15.996734 19.42999,20.17157 -14.81418,4.315643 -36.67379,-9.661377 -51.42999,-12.738892 -29.26459,-6.103332 -60.09938,-5.243652 -89,2.417053 -9.64366,2.556275 -34.20775,17.254883 -43.24953,8.897827 -6.94209,-6.416381 13.59549,-15.169311 17.24964,-16.905212 22.4806,-10.679504 47.22805,-15.410095 71.99989,-16.342834 m -97,31.499084 v 0 M 191.6071,210.72518 c -3.43999,0.91074 -23.90343,12.93882 -16.9714,17.83228 2.36819,1.67175 6.67326,-0.51504 8.99833,-1.2865 8.43224,-2.79776 17.41405,-0.44852 25.50749,-3.05676 5.97623,-1.92594 5.37796,-8.35422 0.81409,-11.57654 -5.02624,-3.54877 -12.63571,-3.42496 -18.34851,-1.91248 m 93.14679,0.0859 c -5.26877,1.62195 -11.79497,8.94058 -4.39114,12.78314 7.24499,3.76014 18.12127,0.94876 26.21975,3.65912 2.49829,0.83612 6.58118,3.0065 9.24012,1.72132 4.60885,-2.2277 -3.72709,-10.3064 -5.39402,-11.77069 -6.89129,-6.05365 -16.66632,-9.16605 -25.67471,-6.39289 m -167.14743,7.73811 -18.999951,24 c 4.2e-4,-5.64752 -1.541191,-14.63565 1.836281,-19.56204 3.18109,-4.63996 12.2263,-3.75135 17.16367,-4.43796 m 254,1 c 5.20236,0.005 14.0744,-1.39615 18.034,2.83652 4.01971,4.29693 2.38623,14.73172 2.41873,20.16348 m -315.452734,-1 v 90 c -44.536949,-13.77625 -45.20533,-76.69482 0,-90 m 337.000004,90 v -90 c 45.15335,12.90408 45.25146,77.01495 0,90 m -221.81895,-76.9321 c -16.15592,1.982 -14.22113,39.25574 2.71128,36.41599 15.82879,-2.65467 14.04546,-38.47171 -2.71128,-36.41599 m 104.89482,0.0405 c -16.2331,1.83969 -15.14051,38.35269 1.83715,36.47433 16.38889,-1.8132 14.97492,-38.37967 -1.83715,-36.47433 m -94.39597,64.02374 c -8.55861,4.00015 14.31459,20.13562 17.32028,21.66181 17.00756,8.63586 38.67385,7.68084 54.99564,-2.07215 5.22845,-3.12424 10.97101,-7.29852 13.99344,-12.72772 1.40698,-2.52741 2.20328,-7.70496 -2.31366,-7.01154 -5.73392,0.88022 -10.96176,7.48938 -15.69042,10.53507 -8.80282,5.66983 -18.77623,8.13806 -29.20387,7.2796 -10.06412,-0.82852 -18.88452,-5.27609 -26.77717,-11.37976 -2.68218,-2.07422 -8.3951,-8.12173 -12.32424,-6.28531 m 76.24429,88.03522 c -11.56204,-4.82276 -27.62002,-2.16736 -39.92419,-2.16736 v -6 c 13.98245,7e-4 36.95963,-1.11923 48.65778,7.56921"/>
+                </svg>
+                <h1>Clippy</h1>
+            </div>
+            <div class="header-right">
+                <div id="status">Status: Checking...</div>
+                <button id="downloadBtn" onclick="downloadModel()" style="display:none;">Download Model</button>
+                <div id="progress" style="display:none;">Downloading: <span id="progressText">0%</span></div>
+            </div>
+        </header>
+        <div id="chat">
+            <div class="empty-state">
+                <strong>Welcome to Clippy</strong>
+                <p>Type a message below to start chatting</p>
+            </div>
+        </div>
+        <div class="input-area">
+            <input type="text" id="message" placeholder="Type your message here..." disabled>
+            <button onclick="sendMessage()" id="sendBtn" disabled>Send</button>
+        </div>
+    </div>
+    <script src="script.js?v=2"></script>
 </body>
 </html>
