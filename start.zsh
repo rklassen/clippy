@@ -18,7 +18,7 @@ sleep 2  # Wait for Ollama to start
 
 # Check if model is available
 if ! ollama list | grep -q "qwen2:0.5b"; then
-    echo "Pulling model qwen2:0.5b-q8_0..."
+    echo "Pulling model qwen2:0.5b..."
     ollama pull qwen2:0.5b
 fi
 
